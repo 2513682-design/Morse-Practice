@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Luyện mã Morse - Giao diện tối giản, tập trung cao độ. Luyện gõ và luyện nghe.">
+    <title>Morse Trainer — Luyện mã Morse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Ambient background -->
+    <canvas id="particles-canvas"></canvas>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div id="app">
+        <!-- ===== HEADER ===== -->
+        <header id="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="logo-dot">·</span>
+                    <span class="logo-dash">—</span>
+                </div>
+                <span class="logo-text">MORSE</span>
+                <span class="logo-sub">TRAINER</span>
+            </div>
+
+            <!-- Tab chuyển chế độ -->
+            <nav id="mode-tabs">
+                <button class="tab-btn active" data-tab="typing" id="tab-typing">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M6 16h12"/></svg>
+                    <span>Luyện gõ</span>
+                </button>
+                <button class="tab-btn" data-tab="listening" id="tab-listening">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                    <span>Luyện nghe</span>
+                </button>
+                <button class="tab-btn" data-tab="abbr" id="tab-abbr">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+                    <span>Viết tắt</span>
+                </button>
+            </nav>
+
+            <div class="header-controls">
+                <button id="btn-sound" class="icon-btn active" title="Bật/Tắt âm thanh">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path class="sound-wave" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                </button>
+                <button id="btn-analytics" class="icon-btn" title="Phân tích lỗi">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </button>
+                <button id="btn-settings" class="icon-btn" title="Cài đặt">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div id="content-wrapper">
+            <!-- Cột trái: Khu vực luyện tập -->
+            <main id="main-area">
+
+                <!-- ===== CHẾ ĐỘ LUYỆN GÕ ===== -->
+                <section id="typing-mode" class="mode-section active">
+                    <!-- Score bar -->
+                    <div class="score-bar">
+                        <div class="score-item">
+                            <div class="score-ring">
+                                <svg viewBox="0 0 40 40">
+                                    <circle cx="20" cy="20" r="17" class="ring-bg"/>
+                                    <circle cx="20" cy="20" r="17" class="ring-fill" id="accuracy-ring"/>
+                                </svg>
+                                <span class="ring-value" id="accuracy-pct">0%</span>
+                            </div>
+                            <span class="score-label">Chính xác</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-value" id="streak">0</span>
+                            <span class="score-label">Chuỗi</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="correct">0</span>
+                            <span class="score-label">Đúng</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="total">0</span>
+                            <span class="score-label">Tổng</span>
+                        </div>
+                    </div>
+
+                    <!-- Challenge card -->
+                    <div class="challenge-card">
+                        <div class="card-label">Dịch ký tự này sang mã Morse</div>
+                        <div id="char-display">A</div>
+                        <div id="morse-hint" class="morse-hint">· —</div>
+                    </div>
+
+                    <!-- Input area -->
+                    <div class="input-section">
+                        <div id="morse-input-display" class="input-box">
+                            <span id="user-morse" class="morse-text"></span>
+                            <span class="cursor-blink">|</span>
+                        </div>
+                        <div id="visual-feedback"></div>
+                        <div id="hold-indicator">
+                            <div id="hold-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile touch buttons -->
+                    <div class="mobile-touch-btns" id="typing-touch-btns">
+                        <button class="touch-btn touch-dot" data-action="dot" aria-label="Dot">
+                            <span class="touch-symbol">·</span>
+                            <span class="touch-label">Ngắn</span>
+                        </button>
+                        <button class="touch-btn touch-dash" data-action="dash" aria-label="Dash">
+                            <span class="touch-symbol">—</span>
+                            <span class="touch-label">Dài</span>
+                        </button>
+                        <button class="touch-btn touch-del" data-action="delete" aria-label="Xoá">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+                            <span class="touch-label">Xoá</span>
+                        </button>
+                        <button class="touch-btn touch-check" data-action="check" aria-label="Kiểm tra">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span class="touch-label">OK</span>
+                        </button>
+                        <button class="touch-btn touch-skip" data-action="skip" aria-label="Bỏ qua">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                            <span class="touch-label">Bỏ</span>
+                        </button>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="instructions">
+                        <div class="key-hint primary-hint">
+                            <kbd>SPACE</kbd>
+                            <span>Nhấn nhanh = <b>·</b> &nbsp;·&nbsp; Giữ lâu = <b>—</b></span>
+                        </div>
+                        <div class="key-hint">
+                            <kbd>ENTER</kbd> Kiểm tra &nbsp;
+                            <kbd>⌫</kbd> Xoá &nbsp;
+                            <kbd>ESC</kbd> Bỏ qua
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử trả lời gần đây -->
+                    <div class="history-section">
+                        <div class="history-label">Lịch sử gần đây</div>
+                        <div id="history-list">
+                            <div class="history-empty">Chưa có lịch sử</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== CHẾ ĐỘ LUYỆN NGHE ===== -->
+                <section id="listening-mode" class="mode-section">
+                    <!-- Score bar (listening) -->
+                    <div class="score-bar">
+                        <div class="score-item">
+                            <div class="score-ring">
+                                <svg viewBox="0 0 40 40">
+                                    <circle cx="20" cy="20" r="17" class="ring-bg"/>
+                                    <circle cx="20" cy="20" r="17" class="ring-fill" id="listen-accuracy-ring"/>
+                                </svg>
+                                <span class="ring-value" id="listen-accuracy-pct">0%</span>
+                            </div>
+                            <span class="score-label">Chính xác</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-value" id="listen-streak">0</span>
+                            <span class="score-label">Chuỗi</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="listen-correct">0</span>
+                            <span class="score-label">Đúng</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="listen-total">0</span>
+                            <span class="score-label">Tổng</span>
+                        </div>
+                    </div>
+
+                    <!-- Listening card -->
+                    <div class="challenge-card listening-card">
+                        <div class="card-label">Nghe tín hiệu Morse và đoán ký tự</div>
+
+                        <!-- Waveform visualizer -->
+                        <div id="wave-visualizer">
+                            <div class="wave-bar" id="wave-dot-1"></div>
+                            <div class="wave-bar" id="wave-dot-2"></div>
+                            <div class="wave-bar" id="wave-dot-3"></div>
+                            <div class="wave-bar" id="wave-dot-4"></div>
+                            <div class="wave-bar" id="wave-dot-5"></div>
+                        </div>
+
+                        <!-- Morse hiển thị sau khi phát -->
+                        <div id="listen-morse-display" class="listen-morse">—</div>
+
+                        <!-- Nút phát -->
+                        <div class="listen-controls">
+                            <button id="btn-play-morse" class="play-btn" title="Phát tín hiệu Morse">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                <span>Phát lại</span>
+                            </button>
+                            <div class="speed-control">
+                                <label>Tốc độ:</label>
+                                <select id="listen-speed">
+                                    <option value="slow">Chậm</option>
+                                    <option value="normal" selected>Vừa</option>
+                                    <option value="fast">Nhanh</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input nhập ký tự -->
+                    <div class="input-section">
+                        <div class="listen-input-wrapper">
+                            <input type="text" id="listen-char-input" class="listen-input" maxlength="1" placeholder="?" autocomplete="off" spellcheck="false">
+                            <button id="btn-listen-check" class="check-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Kiểm tra
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instructions (listening) -->
+                    <div class="instructions">
+                        <div class="key-hint primary-hint">
+                            <kbd>R</kbd> Phát lại &nbsp;&nbsp;
+                            <kbd>ENTER</kbd> Kiểm tra &nbsp;&nbsp;
+                            <kbd>ESC</kbd> Bỏ qua
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử listening -->
+                    <div class="history-section">
+                        <div class="history-label">Lịch sử gần đây</div>
+                        <div id="listen-history-list">
+                            <div class="history-empty">Chưa có lịch sử</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== CHẾ ĐỘ VIẾT TẮT ===== -->
+                <section id="abbr-mode" class="mode-section">
+                    <div class="score-bar">
+                        <div class="score-item">
+                            <div class="score-ring">
+                                <svg viewBox="0 0 40 40">
+                                    <circle cx="20" cy="20" r="17" class="ring-bg"/>
+                                    <circle cx="20" cy="20" r="17" class="ring-fill" id="abbr-accuracy-ring"/>
+                                </svg>
+                                <span class="ring-value" id="abbr-accuracy-pct">0%</span>
+                            </div>
+                            <span class="score-label">Chính xác</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-value" id="abbr-streak">0</span>
+                            <span class="score-label">Chuỗi</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="abbr-correct">0</span>
+                            <span class="score-label">Đúng</span>
+                        </div>
+                        <div class="score-divider"></div>
+                        <div class="score-item">
+                            <span class="score-value" id="abbr-total">0</span>
+                            <span class="score-label">Tổng</span>
+                        </div>
+                    </div>
+
+                    <!-- Abbreviation challenge -->
+                    <div class="challenge-card abbr-card">
+                        <div class="card-label">Gõ mã Morse cho từ viết tắt</div>
+                        <div id="abbr-word" class="abbr-word">CQ</div>
+                        <div id="abbr-meaning" class="abbr-meaning">Gọi tất cả các trạm</div>
+                        <!-- Letter progress -->
+                        <div id="abbr-letters" class="abbr-letters"></div>
+                        <div id="abbr-hint" class="morse-hint">—</div>
+                    </div>
+
+                    <!-- Input -->
+                    <div class="input-section">
+                        <div id="abbr-input-display" class="input-box">
+                            <span id="abbr-user-morse" class="morse-text"></span>
+                            <span class="cursor-blink">|</span>
+                        </div>
+                        <div id="abbr-visual-feedback"></div>
+                        <div id="abbr-hold-indicator">
+                            <div id="abbr-hold-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile touch buttons (abbr) -->
+                    <div class="mobile-touch-btns" id="abbr-touch-btns">
+                        <button class="touch-btn touch-dot" data-action="dot" aria-label="Dot">
+                            <span class="touch-symbol">·</span>
+                            <span class="touch-label">Ngắn</span>
+                        </button>
+                        <button class="touch-btn touch-dash" data-action="dash" aria-label="Dash">
+                            <span class="touch-symbol">—</span>
+                            <span class="touch-label">Dài</span>
+                        </button>
+                        <button class="touch-btn touch-del" data-action="delete" aria-label="Xoá">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+                            <span class="touch-label">Xoá</span>
+                        </button>
+                        <button class="touch-btn touch-check" data-action="check" aria-label="Kiểm tra">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span class="touch-label">OK</span>
+                        </button>
+                        <button class="touch-btn touch-skip" data-action="skip" aria-label="Bỏ qua">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+                            <span class="touch-label">Bỏ</span>
+                        </button>
+                    </div>
+
+                    <div class="instructions">
+                        <div class="key-hint primary-hint">
+                            <kbd>SPACE</kbd>
+                            <span>Nhấn nhanh = <b>·</b> &nbsp;·&nbsp; Giữ lâu = <b>—</b></span>
+                        </div>
+                        <div class="key-hint">
+                            <kbd>ENTER</kbd> Kiểm tra ký tự &nbsp;
+                            <kbd>⌫</kbd> Xoá &nbsp;
+                            <kbd>ESC</kbd> Bỏ qua
+                        </div>
+                    </div>
+
+                    <div class="history-section">
+                        <div class="history-label">Lịch sử gần đây</div>
+                        <div id="abbr-history-list">
+                            <div class="history-empty">Chưa có lịch sử</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- ===== SIDEBAR: Bảng mã Morse ===== -->
+            <aside id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Bảng mã Morse</h2>
+                    <button id="btn-toggle-sidebar" class="icon-btn" title="Ẩn/Hiện bảng mã">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                </div>
+                <div id="ref-content" class="sidebar-body">
+                    <!-- JS tạo -->
+                </div>
+            </aside>
+        </div>
+
+        <!-- ===== SETTINGS PANEL ===== -->
+        <div id="settings-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>Cài đặt</h2>
+                <button id="close-settings" class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="panel-body">
+                <div class="setting-group">
+                    <label class="setting-label">Bộ ký tự</label>
+                    <div class="radio-group">
+                        <label class="radio-item active" data-charset="letters">
+                            <input type="radio" name="charset" value="letters" checked>
+                            <span>Chữ cái (A-Z)</span>
+                        </label>
+                        <label class="radio-item" data-charset="numbers">
+                            <input type="radio" name="charset" value="numbers">
+                            <span>Số (0-9)</span>
+                        </label>
+                        <label class="radio-item" data-charset="all">
+                            <input type="radio" name="charset" value="all">
+                            <span>Tất cả</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Hiện gợi ý mã Morse</label>
+                    <div class="setting-row">
+                        <span class="setting-desc">Hiện đáp án bên dưới ký tự</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-hint">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Ngưỡng giữ phím (ms): <span id="threshold-value">180</span></label>
+                    <input type="range" id="threshold-range" min="100" max="400" value="180" step="10">
+                    <div class="range-labels">
+                        <span>100</span>
+                        <span>Nhạy hơn ← → Ít nhạy</span>
+                        <span>400</span>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Bảng từ viết tắt Morse</label>
+                    <div class="setting-row">
+                        <span class="setting-desc">Hiện bảng tra cứu abbreviations</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-abbr-table">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="abbr-ref-table" class="abbr-ref-table hidden">
+                        <!-- JS tạo -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Panel -->
+        <div id="analytics-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>📊 Phân tích &amp; Gợi ý</h2>
+                <button id="close-analytics" class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="analytics-body" class="panel-body"></div>
+        </div>
+
+        <!-- Overlay -->
+        <div id="overlay" class="hidden"></div>
+    </div>
+
+    <!-- Flash feedback -->
+    <div id="result-flash" class="hidden"></div>
+
+    <script src="analytics.js"></script>
+    <script src="abbr.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
