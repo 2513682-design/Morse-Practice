@@ -238,6 +238,17 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 .abbr-ref-meaning{color:var(--text-secondary);flex:1}
 .abbr-ref-morse{font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);letter-spacing:1px}
 
+/* Morse reference in settings */
+.ref-panel{max-height:260px;overflow-y:auto;transition:max-height var(--slow),opacity var(--normal);margin-bottom:8px}
+.ref-panel.hidden{max-height:0;opacity:0;overflow:hidden;margin:0}
+.ref-panel::-webkit-scrollbar{width:3px}
+.ref-panel::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:99px}
+.settings-ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.settings-ref-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:var(--radius-sm);font-size:.8rem;transition:var(--fast)}
+.settings-ref-item:hover{background:var(--bg-surface)}
+.settings-ref-char{font-family:var(--font-mono);font-weight:600;color:var(--blue-300);width:16px;text-align:center}
+.settings-ref-morse{font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);letter-spacing:2px}
+
 /* ===== ANALYTICS MODAL (fullscreen) ===== */
 #analytics-panel{
     position:fixed;inset:0;z-index:200;

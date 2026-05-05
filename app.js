@@ -81,10 +81,48 @@ function getPool() {
     const L = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), N = '0123456789'.split('');
     return state.charset === 'letters' ? L : state.charset === 'numbers' ? N : [...L, ...N];
 }
+
+// Anti-repetition system: shuffle bag + recent history buffer
+let _shuffleBag = [];
+let _recentHistory = [];
+const RECENT_HISTORY_RATIO = 3; // avoid last pool.length/3 chars
+
 function randChar(exclude = '') {
-    const p = getPool(); let c;
-    do { c = p[Math.floor(Math.random() * p.length)]; } while (c === exclude && p.length > 1);
-    return c;
+    const pool = getPool();
+    const histLen = Math.max(Math.floor(pool.length / RECENT_HISTORY_RATIO), 1);
+
+    // Refill bag if empty or pool changed
+    if (_shuffleBag.length === 0 || _shuffleBag.some(c => !pool.includes(c))) {
+        _shuffleBag = [...pool];
+        // Fisher-Yates shuffle
+        for (let i = _shuffleBag.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [_shuffleBag[i], _shuffleBag[j]] = [_shuffleBag[j], _shuffleBag[i]];
+        }
+    }
+
+    // Pick from bag, skip if in recent history or is exclude
+    let picked = null;
+    for (let attempt = 0; attempt < _shuffleBag.length; attempt++) {
+        const candidate = _shuffleBag[attempt];
+        if (candidate !== exclude && !_recentHistory.includes(candidate)) {
+            picked = candidate;
+            _shuffleBag.splice(attempt, 1);
+            break;
+        }
+    }
+
+    // Fallback: just take first non-exclude
+    if (!picked) {
+        const idx = _shuffleBag.findIndex(c => c !== exclude);
+        picked = _shuffleBag.splice(idx >= 0 ? idx : 0, 1)[0] || pool[0];
+    }
+
+    // Update history buffer
+    _recentHistory.push(picked);
+    while (_recentHistory.length > histLen) _recentHistory.shift();
+
+    return picked;
 }
 function morseVisual(s) { return s.split('').map(c => c === '.' ? '·' : '—').join(' '); }
 
@@ -442,8 +480,10 @@ function bindEvents() {
     // Charset
     $$('input[name="charset"]').forEach(inp => inp.addEventListener('change', e => {
         state.charset = e.target.value;
+        _shuffleBag = []; _recentHistory = []; // reset anti-repetition
         $$('.radio-item[data-charset]').forEach(el => el.classList.toggle('active', el.dataset.charset === state.charset));
-        if (state.tab === 'typing') setNewChallenge(); else setNewListenChallenge();
+        if (state.tab === 'typing') setNewChallenge();
+        else if (state.tab === 'listening') setNewListenChallenge();
     }));
 
     // Hint toggle
@@ -451,6 +491,16 @@ function bindEvents() {
         state.hintVisible = dom.toggleHint.checked;
         dom.morseHint.classList.toggle('visible', state.hintVisible);
     });
+
+    // Morse reference toggle in settings
+    const toggleMorseRef = document.getElementById('toggle-morse-ref');
+    const morseRefPanel = document.getElementById('morse-ref-panel');
+    if (toggleMorseRef && morseRefPanel) {
+        toggleMorseRef.addEventListener('change', () => {
+            morseRefPanel.classList.toggle('hidden', !toggleMorseRef.checked);
+            if (toggleMorseRef.checked) buildSettingsMorseRef();
+        });
+    }
 
     // Threshold
     dom.thresholdRange.addEventListener('input', () => {
@@ -511,6 +561,18 @@ function bindEvents() {
 function closeSettings() {
     dom.settingsPanel.classList.add('hidden');
     dom.overlay.classList.add('hidden');
+}
+
+/* ---------- SETTINGS MORSE REFERENCE ---------- */
+function buildSettingsMorseRef() {
+    const grid = document.getElementById('settings-morse-ref');
+    if (!grid || grid.children.length > 0) return; // only build once
+    Object.entries(MORSE_CODE).forEach(([c, m]) => {
+        const el = document.createElement('div');
+        el.className = 'settings-ref-item';
+        el.innerHTML = `<span class="settings-ref-char">${c}</span><span class="settings-ref-morse">${morseVisual(m)}</span>`;
+        grid.appendChild(el);
+    });
 }
 
 /* ---------- INIT ---------- */

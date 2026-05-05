@@ -380,7 +380,7 @@
             </div>
             <div class="panel-body">
                 <div class="setting-group">
-                    <label class="setting-label">Bộ ký tự</label>
+                    <label class="setting-label">Bộ ký tự luyện tập</label>
                     <div class="radio-group">
                         <label class="radio-item active" data-charset="letters">
                             <input type="radio" name="charset" value="letters" checked>
@@ -392,8 +392,31 @@
                         </label>
                         <label class="radio-item" data-charset="all">
                             <input type="radio" name="charset" value="all">
-                            <span>Tất cả</span>
+                            <span>Tất cả (A-Z, 0-9)</span>
                         </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Bảng tra cứu</label>
+                    <div class="setting-row" style="margin-bottom:8px">
+                        <span class="setting-desc">Bảng mã Morse (A-Z, 0-9)</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-morse-ref">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="morse-ref-panel" class="ref-panel hidden">
+                        <div id="settings-morse-ref" class="settings-ref-grid"></div>
+                    </div>
+                    <div class="setting-row" style="margin-bottom:8px">
+                        <span class="setting-desc">Bảng viết tắt Morse</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-abbr-table">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="abbr-ref-table" class="abbr-ref-table hidden">
+                        <!-- JS tạo -->
                     </div>
                 </div>
                 <div class="setting-group">
@@ -415,19 +438,7 @@
                         <span>400</span>
                     </div>
                 </div>
-                <div class="setting-group">
-                    <label class="setting-label">Bảng từ viết tắt Morse</label>
-                    <div class="setting-row">
-                        <span class="setting-desc">Hiện bảng tra cứu abbreviations</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="toggle-abbr-table">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div id="abbr-ref-table" class="abbr-ref-table hidden">
-                        <!-- JS tạo -->
-                    </div>
-                </div>
+
             </div>
         </div>
 

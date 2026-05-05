@@ -51,9 +51,22 @@ function initAbbr(){
     updateAbbrScore();
 }
 
+let _abbrBag=[];
+let _abbrRecent=[];
 function randAbbr(){
-    let a;do{a=ABBREVIATIONS[Math.floor(Math.random()*ABBREVIATIONS.length)];}
-    while(a===abbrState.current&&ABBREVIATIONS.length>1);return a;
+    const histLen=Math.max(Math.floor(ABBREVIATIONS.length/3),2);
+    if(_abbrBag.length===0){
+        _abbrBag=[...ABBREVIATIONS];
+        for(let i=_abbrBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_abbrBag[i],_abbrBag[j]]=[_abbrBag[j],_abbrBag[i]];}
+    }
+    let picked=null;
+    for(let i=0;i<_abbrBag.length;i++){
+        if(!_abbrRecent.includes(_abbrBag[i])){picked=_abbrBag.splice(i,1)[0];break;}
+    }
+    if(!picked) picked=_abbrBag.shift();
+    _abbrRecent.push(picked);
+    while(_abbrRecent.length>histLen) _abbrRecent.shift();
+    return picked;
 }
 
 function setNewAbbrChallenge(){
