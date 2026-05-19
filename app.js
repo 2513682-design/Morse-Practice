@@ -425,6 +425,11 @@ function bindEvents() {
 
     // Keyboard
     document.addEventListener('keydown', e => {
+        // Skip if user is typing in an input/textarea or auth modal is open
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (!document.getElementById('auth-modal')?.classList.contains('hidden')) return;
+
         if (!$('#settings-panel').classList.contains('hidden')) {
             if (e.key === 'Escape') closeSettings();
             return;
@@ -586,5 +591,6 @@ function init() {
     updateListenScore();
     if (typeof initAbbr === 'function') initAbbr();
     if (typeof initAnalytics === 'function') initAnalytics();
+    if (typeof initAuth === 'function') initAuth();
 }
 init();

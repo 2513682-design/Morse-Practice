@@ -9,6 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK (compat for vanilla JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Ambient background -->
@@ -60,6 +65,21 @@
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
+
+                <!-- User area -->
+                <button id="btn-login" class="auth-login-btn" title="Đăng nhập">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <span>Đăng nhập</span>
+                </button>
+                <div id="user-area" class="user-area hidden">
+                    <div class="user-avatar" id="user-avatar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <span id="user-name" class="user-name"></span>
+                    <button id="btn-logout" class="icon-btn" title="Đăng xuất">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -457,9 +477,45 @@
         <div id="overlay" class="hidden"></div>
     </div>
 
+    <!-- ===== AUTH MODAL ===== -->
+    <div id="auth-modal" class="auth-modal hidden">
+        <div class="auth-card">
+            <button id="auth-close" class="auth-close-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <span class="logo-dot">·</span><span class="logo-dash">—</span>
+                </div>
+                <h2 id="auth-title">Đăng nhập</h2>
+                <p class="auth-subtitle">Đồng bộ dữ liệu luyện tập trên mọi thiết bị</p>
+            </div>
+            <div id="auth-error" class="auth-error hidden"></div>
+            <form id="auth-form" data-mode="login" autocomplete="on">
+                <div class="auth-field">
+                    <label for="auth-username">Tên đăng nhập</label>
+                    <input type="text" id="auth-username" placeholder="vd: morse_pro" required maxlength="20" autocomplete="username">
+                </div>
+                <div id="auth-email-group" class="auth-field hidden">
+                    <label for="auth-email">Email <span style="font-weight:300;opacity:.6">(dùng để khôi phục mật khẩu)</span></label>
+                    <input type="email" id="auth-email" placeholder="email@example.com" autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <label for="auth-pass">Mật khẩu</label>
+                    <input type="password" id="auth-pass" placeholder="Tối thiểu 6 ký tự" required minlength="6" autocomplete="current-password">
+                </div>
+                <button type="submit" id="auth-submit" class="auth-submit-btn">Đăng nhập</button>
+            </form>
+            <p id="auth-toggle" class="auth-toggle">
+                Chưa có tài khoản? <a href="#" id="auth-switch">Đăng ký</a>
+            </p>
+        </div>
+    </div>
+
     <!-- Flash feedback -->
     <div id="result-flash" class="hidden"></div>
 
+    <script src="auth.js"></script>
     <script src="analytics.js"></script>
     <script src="abbr.js"></script>
     <script src="app.js"></script>
