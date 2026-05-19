@@ -34,6 +34,21 @@ const AUTH_ERRORS = {
 };
 function getAuthError(code) { return AUTH_ERRORS[code] || 'Đã xảy ra lỗi. Vui lòng thử lại.'; }
 
+// ──────────── USERNAME ↔ EMAIL LOCAL CACHE ────────────
+function saveUsernameLocal(username, email) {
+    try {
+        const map = JSON.parse(localStorage.getItem('morseUserMap') || '{}');
+        map[username.toLowerCase()] = email;
+        localStorage.setItem('morseUserMap', JSON.stringify(map));
+    } catch(e) {}
+}
+function getEmailByUsername(username) {
+    try {
+        const map = JSON.parse(localStorage.getItem('morseUserMap') || '{}');
+        return map[username.toLowerCase()] || null;
+    } catch(e) { return null; }
+}
+
 // ──────────── DOM HELPERS ────────────
 function showAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
 function hideAuthModal() {
@@ -69,7 +84,10 @@ async function handleRegister(e) {
         const cred = await auth.createUserWithEmailAndPassword(email, pass);
         await cred.user.updateProfile({ displayName: username });
 
-        // Step 2: Save to Firestore (may fail if rules not set, but auth already works)
+        // Step 2: Save username→email locally (always works)
+        saveUsernameLocal(username, email);
+
+        // Step 3: Save to Firestore (may fail if rules not set, but auth already works)
         try {
             await db.collection('users').doc(cred.user.uid).set({
                 username: username,
@@ -81,7 +99,6 @@ async function handleRegister(e) {
             });
         } catch (firestoreErr) {
             console.warn('Firestore save failed (check Firestore rules):', firestoreErr);
-            // Auth still succeeded — user can login, data just won't sync yet
         }
 
         hideAuthModal();
@@ -112,23 +129,29 @@ async function handleLogin(e) {
     try {
         let email = null;
 
-        // Try Firestore lookup first
-        try {
-            const usernameDoc = await db.collection('usernames').doc(username).get();
-            if (usernameDoc.exists) {
-                const uid = usernameDoc.data().uid;
-                const userDoc = await db.collection('users').doc(uid).get();
-                if (userDoc.exists) email = userDoc.data().email;
+        // 1. Check localStorage first (fastest, always available)
+        email = getEmailByUsername(username);
+
+        // 2. Try Firestore lookup
+        if (!email) {
+            try {
+                const usernameDoc = await db.collection('usernames').doc(username).get();
+                if (usernameDoc.exists) {
+                    const uid = usernameDoc.data().uid;
+                    const userDoc = await db.collection('users').doc(uid).get();
+                    if (userDoc.exists) {
+                        email = userDoc.data().email;
+                        saveUsernameLocal(username, email); // cache locally
+                    }
+                }
+            } catch (fsErr) {
+                console.warn('Firestore lookup failed:', fsErr);
             }
-        } catch (fsErr) {
-            console.warn('Firestore lookup failed, trying email fallback:', fsErr);
         }
 
-        // If Firestore lookup failed, try treating username as email directly
-        // (fallback for users who registered but Firestore rules blocked the write)
-        if (!email) {
-            // Try username@morse.app as a constructed email, or the username itself if it looks like email
-            email = username.includes('@') ? username : null;
+        // 3. Try username as email directly (if user types email)
+        if (!email && username.includes('@')) {
+            email = username;
         }
 
         if (!email) {
