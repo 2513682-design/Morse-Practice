@@ -213,11 +213,13 @@ function setAuthMode(mode) {
         submit.textContent = 'Đăng ký';
         title.textContent = 'Tạo tài khoản';
         toggle.innerHTML = 'Đã có tài khoản? <a href="#" id="auth-switch">Đăng nhập</a>';
+        document.getElementById('auth-forgot')?.classList.add('hidden');
     } else {
         emailGroup.classList.add('hidden');
         submit.textContent = 'Đăng nhập';
         title.textContent = 'Đăng nhập';
         toggle.innerHTML = 'Chưa có tài khoản? <a href="#" id="auth-switch">Đăng ký</a>';
+        document.getElementById('auth-forgot')?.classList.remove('hidden');
     }
 
     document.getElementById('auth-switch').addEventListener('click', e => {
@@ -314,6 +316,17 @@ function initAuth() {
         if (e.target.id === 'auth-modal') hideAuthModal();
     });
 
+    // Forgot password
+    document.getElementById('auth-forgot-link')?.addEventListener('click', e => {
+        e.preventDefault();
+        showResetView();
+    });
+    document.getElementById('auth-back-login')?.addEventListener('click', e => {
+        e.preventDefault();
+        hideResetView();
+    });
+    document.getElementById('auth-reset-submit')?.addEventListener('click', handleResetPassword);
+
     // Escape to close modal
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && !document.getElementById('auth-modal').classList.contains('hidden')) {
@@ -322,4 +335,89 @@ function initAuth() {
     });
 
     startAutoSave();
+}
+
+// ──────────── FORGOT PASSWORD ────────────
+function showResetView() {
+    document.getElementById('auth-form').classList.add('hidden');
+    document.getElementById('auth-toggle').classList.add('hidden');
+    document.getElementById('auth-forgot').classList.add('hidden');
+    document.getElementById('auth-reset-view').classList.remove('hidden');
+    document.getElementById('auth-reset-error').classList.add('hidden');
+    document.getElementById('auth-reset-success').classList.add('hidden');
+    document.getElementById('auth-reset-input').value = '';
+    document.getElementById('auth-title').textContent = 'Quên mật khẩu';
+}
+
+function hideResetView() {
+    document.getElementById('auth-form').classList.remove('hidden');
+    document.getElementById('auth-toggle').classList.remove('hidden');
+    document.getElementById('auth-forgot').classList.remove('hidden');
+    document.getElementById('auth-reset-view').classList.add('hidden');
+    setAuthMode('login');
+}
+
+async function handleResetPassword() {
+    const input = document.getElementById('auth-reset-input').value.trim().toLowerCase();
+    const errEl = document.getElementById('auth-reset-error');
+    const okEl  = document.getElementById('auth-reset-success');
+    const btn   = document.getElementById('auth-reset-submit');
+
+    errEl.classList.add('hidden');
+    okEl.classList.add('hidden');
+
+    if (!input) {
+        errEl.textContent = 'Vui lòng nhập tên đăng nhập hoặc email.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Đang gửi...';
+
+    try {
+        let email = null;
+
+        // If input looks like email, use directly
+        if (input.includes('@')) {
+            email = input;
+        } else {
+            // Try localStorage
+            email = getEmailByUsername(input);
+
+            // Try Firestore
+            if (!email) {
+                try {
+                    const doc = await db.collection('usernames').doc(input).get();
+                    if (doc.exists) {
+                        const uid = doc.data().uid;
+                        const userDoc = await db.collection('users').doc(uid).get();
+                        if (userDoc.exists) email = userDoc.data().email;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        if (!email) {
+            errEl.textContent = 'Không tìm thấy tài khoản. Kiểm tra lại tên đăng nhập hoặc email.';
+            errEl.classList.remove('hidden');
+            btn.disabled = false; btn.textContent = 'Gửi link đặt lại';
+            return;
+        }
+
+        await auth.sendPasswordResetEmail(email);
+
+        // Mask email for display
+        const masked = email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+        okEl.textContent = `✓ Đã gửi link đặt lại mật khẩu đến ${masked}. Kiểm tra hộp thư (và thư rác).`;
+        okEl.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Gửi lại';
+
+    } catch (err) {
+        console.error('Reset password error:', err);
+        errEl.textContent = err.code === 'auth/user-not-found'
+            ? 'Không tìm thấy tài khoản với email này.'
+            : 'Đã xảy ra lỗi. Vui lòng thử lại.';
+        errEl.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Gửi link đặt lại';
+    }
 }

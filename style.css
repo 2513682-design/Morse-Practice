@@ -371,6 +371,17 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 .auth-toggle a{color:var(--blue-300);text-decoration:none;font-weight:500}
 .auth-toggle a:hover{color:var(--blue-200);text-decoration:underline}
 
+/* Forgot password */
+.auth-forgot{text-align:right;font-size:.75rem;margin:-8px 0 12px}
+.auth-forgot a{color:var(--text-muted);text-decoration:none;transition:var(--fast)}
+.auth-forgot a:hover{color:var(--blue-300)}
+.auth-success{
+    background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);
+    color:var(--success);font-size:.78rem;padding:10px 14px;
+    border-radius:var(--radius-md);margin-bottom:16px;line-height:1.4;
+}
+.auth-success.hidden{display:none}
+
 
 /* ===== ANALYTICS MODAL (fullscreen) ===== */
 #analytics-panel{

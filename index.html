@@ -506,9 +506,27 @@
                 </div>
                 <button type="submit" id="auth-submit" class="auth-submit-btn">Đăng nhập</button>
             </form>
+            <p id="auth-forgot" class="auth-forgot">
+                <a href="#" id="auth-forgot-link">Quên mật khẩu?</a>
+            </p>
             <p id="auth-toggle" class="auth-toggle">
                 Chưa có tài khoản? <a href="#" id="auth-switch">Đăng ký</a>
             </p>
+
+            <!-- Forgot password view -->
+            <div id="auth-reset-view" class="hidden">
+                <p class="auth-subtitle" style="margin-bottom:16px">Nhập tên đăng nhập hoặc email để nhận link đặt lại mật khẩu</p>
+                <div id="auth-reset-error" class="auth-error hidden"></div>
+                <div id="auth-reset-success" class="auth-success hidden"></div>
+                <div class="auth-field">
+                    <label for="auth-reset-input">Tên đăng nhập hoặc Email</label>
+                    <input type="text" id="auth-reset-input" placeholder="username hoặc email@example.com">
+                </div>
+                <button id="auth-reset-submit" class="auth-submit-btn">Gửi link đặt lại</button>
+                <p class="auth-toggle" style="margin-top:14px">
+                    <a href="#" id="auth-back-login">← Quay lại đăng nhập</a>
+                </p>
+            </div>
         </div>
     </div>
 
