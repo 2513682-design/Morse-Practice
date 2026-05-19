@@ -372,7 +372,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 .auth-toggle a:hover{color:var(--blue-200);text-decoration:underline}
 
 /* Forgot password */
-.auth-forgot{text-align:right;font-size:.75rem;margin:-8px 0 12px}
+.auth-forgot{text-align:center;font-size:.75rem;margin:8px 0 0}
 .auth-forgot a{color:var(--text-muted);text-decoration:none;transition:var(--fast)}
 .auth-forgot a:hover{color:var(--blue-300)}
 .auth-success{
