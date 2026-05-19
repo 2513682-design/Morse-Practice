@@ -40,7 +40,7 @@ function cacheDom() {
         'wave-visualizer','listen-morse-display','btn-play-morse','listen-speed',
         'listen-char-input','btn-listen-check','listen-history-list',
         'btn-start-test','test-intro','test-question-area','test-result-area','test-progress','test-score',
-        'test-prompt','test-listen-prompt','test-typing-prompt','test-listen-input','test-char-display',
+        'test-prompt','test-listen-prompt','test-typing-prompt','test-listen-input','test-listen-answer','test-char-display',
         'test-user-morse','test-visual-fb','btn-test-play','btn-test-submit','test-final-score','btn-test-retry','test-hint-space'];
     ids.forEach(id => { dom[id.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = document.getElementById(id); });
 }
@@ -840,6 +840,8 @@ function showTestQuestion() {
         
         dom.testListenInput.value = '';
         dom.testListenInput.classList.remove('correct-flash', 'wrong-flash');
+        dom.testListenAnswer.classList.add('hidden');
+        dom.testListenAnswer.textContent = '';
         setTimeout(() => playMorseAudio(MORSE_CODE[q.char]), 400);
         dom.testListenInput.focus();
     }
@@ -907,7 +909,8 @@ function checkTestAnswer() {
         } else {
             dom.testListenInput.classList.add('wrong-flash');
             showFlash('error'); playError();
-            dom.testListenInput.value = `${val} (Sai, phải là ${q.char})`;
+            dom.testListenAnswer.textContent = `✗ Sai! Đáp án đúng là: ${q.char} (${morseVisual(MORSE_CODE[q.char])})`;
+            dom.testListenAnswer.classList.remove('hidden');
         }
     }
     
