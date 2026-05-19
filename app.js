@@ -425,9 +425,11 @@ function bindEvents() {
 
     // Keyboard
     document.addEventListener('keydown', e => {
-        // Skip if user is typing in an input/textarea or auth modal is open
-        const tag = document.activeElement?.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        // Skip if user is typing in an input (except listening input) or auth modal is open
+        const activeEl = document.activeElement;
+        const tag = activeEl?.tagName;
+        const isListenInput = activeEl === dom.listenCharInput;
+        if ((tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') && !isListenInput) return;
         if (!document.getElementById('auth-modal')?.classList.contains('hidden')) return;
 
         if (!$('#settings-panel').classList.contains('hidden')) {

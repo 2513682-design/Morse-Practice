@@ -34,6 +34,7 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px;-webkit-font-smoothing:antialiased}
 body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);height:100vh;overflow:hidden;user-select:none}
+.hidden{display:none !important}
 
 /* Background */
 #particles-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35}
